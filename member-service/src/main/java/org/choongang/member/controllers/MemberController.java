@@ -48,6 +48,7 @@ public class MemberController {
     @Operation(summary = "회원가입")
     @ApiResponse(responseCode = "201", description = "회원가입 성공시 201")
     @Parameters({
+
             @Parameter(name="email", required = true, description = "이메일"),
             @Parameter(name="password", required = true, description = "비밀번호"),
             @Parameter(name="confirmPassword", required = true, description = "비밀번호 확인"),
