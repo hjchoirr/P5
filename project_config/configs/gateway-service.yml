@@ -1,0 +1,50 @@
+server:
+  port: 5000
+
+spring:
+  cloud:
+    gateway:
+      default-filters:  # CORS 관련 설정
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - 'http://hjchoir5cha.xyz'
+            allowCredentials: true # 요청시 인증 정보 전송 허가
+            allowedHeaders: '*'
+            allowedMethods: '*'
+      discovery.locator:
+        enabled: true
+        lowerCaseServiceId: true
+
+      routes:
+        - id: member-service
+          uri: lb://member-service
+          predicates:
+            - Path=/api/v1/member/**
+          filters:
+            - RewritePath=/api/v1/member/?(?<path>.*),/$\{path}
+
+# 유레카 설정
+eureka:
+  instance:
+    hostname: ${hostname}
+    #preferIpAddress: true  # aws는 사설네트워크.. IP로 안됨
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: ${eurekaHost}/eureka/
+
+
+# 액츄에이터 설정
+management:
+  endpoint:
+    gateway:
+      enabled: true
+
+  endpoints:
+    web:
+      exposure:
+        include: gateway
