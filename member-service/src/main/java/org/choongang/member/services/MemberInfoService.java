@@ -1,17 +1,26 @@
 package org.choongang.member.services;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.jni.FileInfo;
+import org.choongang.global.ListData;
+import org.choongang.global.Pagination;
 import org.choongang.member.MemberInfo;
 import org.choongang.member.constants.Authority;
+import org.choongang.member.controllers.MemberSearch;
 import org.choongang.member.entities.Authorities;
 import org.choongang.member.entities.Member;
+import org.choongang.member.entities.QMember;
 import org.choongang.member.repositories.MemberRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -20,6 +29,8 @@ import java.util.List;
 public class MemberInfoService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
+    private final JPAQueryFactory queryFactory;
+    private final HttpServletRequest request;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -42,4 +53,42 @@ public class MemberInfoService implements UserDetailsService {
                 .authorities(authorities)
                 .build();
     }
+    @Transactional  //**** 왜? JPA factory 쓸때?
+    public ListData<Member> getList(MemberSearch search) {
+        int page = Math.max(search.getPage(), 1);
+        int limit = search.getLimit();
+        limit = limit < 1 ? 20 : limit;
+
+        int offset = (page - 1) * limit;
+
+        BooleanBuilder andBuilder = new BooleanBuilder();
+        QMember member = QMember.member;
+
+        String sopt = search.getSopt();
+        String skey = search.getSkey();
+        sopt = StringUtils.hasText(sopt) ? sopt.toLowerCase() : "ALL";
+        if(StringUtils.hasText(skey)) {
+            skey = skey.trim();
+            if(sopt.equals("ALL")) { //통합검색
+
+            }
+        }
+
+        List<Member> items = queryFactory.selectFrom(member)
+                .leftJoin(member.authorities)
+                .fetchJoin()
+                .where(andBuilder)
+                .offset(offset)
+                .limit(limit)
+                .orderBy(member.createdAt.desc())
+                .fetch();
+
+        long total = memberRepository.count(andBuilder);
+
+        //int page, int total, int ranges, int limit, HttpServletRequest request
+        Pagination pagination = new Pagination(page, (int)total, 10, limit, request);
+        return new ListData<>(items, pagination);
+    }
+
+
 }

@@ -31,6 +31,11 @@ public class Member extends BaseEntity {
     @Column(length=15, nullable = false)
     private String mobile;
 
+    private String department; // 부서
+    private String manager; // 부서장
+
+    private String role; // 직무
+
     @ToString.Exclude
     @OneToMany(mappedBy = "member")
     private List<Authorities> authorities;
