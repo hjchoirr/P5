@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.choongang.global.ListData;
 import org.choongang.global.Utils;
 import org.choongang.global.exceptions.BadRequestException;
 import org.choongang.global.rests.JSONData;
@@ -25,16 +24,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-@Tag(name = "Member", description = "회원 인증 API")
+@Tag(name = "Member", description = "회원 API")
 @RestController
-@RequestMapping
 @RequiredArgsConstructor
 public class MemberController {
 
@@ -45,28 +44,30 @@ public class MemberController {
     private final MemberUtil memberUtil;
     private final Utils utils;
 
-
     @Operation(summary = "인증(로그인)한 회원 정보 조회")
-    @ApiResponse(responseCode = "200")
+    @ApiResponse(responseCode = "200", description = "학생, 교수/상담자, 관리자에 따라 개인정보 조회 범위가 다르다<br>조회 가능 범위<br>학생 : 학과, 지도교수, 주소, 휴대폰 번호, 이메일<br>교수/상담사 : 담당 과목, 휴대폰 번호, 이메일")
     // 로그인한 회원 정보 조회
     @GetMapping("/account")
     @PreAuthorize("isAuthenticated()")
     public JSONData info(@AuthenticationPrincipal MemberInfo memberInfo) {
         Member member = memberInfo.getMember();
+
         Authority authority = memberUtil.getMember().getAuthorities().get(0).getAuthority();
 
         Map<String, Object> item = new HashMap<>();
         item.put("seq", member.getSeq());
         item.put("email", member.getEmail());
         item.put("mobile", member.getMobile());
-
-        if(authority == Authority.USER) {
+        if (authority == Authority.COUNSELOR || authority == Authority.PROFESSOR) {
+            item.put("subject", member.getSubject());
+        } else if(authority == Authority.STUDENT) { // 학생
             item.put("department", member.getDepartment());
-            item.put("role", member.getRole());
-            item.put("manager", member.getManager());
-        } else if(authority == Authority.MANAGER) {
-            item.put("department", member.getDepartment());
+            item.put("professor", member.getProfessor());
+            item.put("zonecode", member.getZonecode());
+            item.put("address", member.getAddress());
+            item.put("addressSub", member.getAddressSub());
         }
+
         return authority == Authority.ADMIN ? new JSONData(member) : new JSONData(item);
     }
 
@@ -101,58 +102,15 @@ public class MemberController {
         @Parameter(name="email", required = true, description = "이메일"),
             @Parameter(name="password", required = true, description = "비밀번호")
     })
-    @PostMapping("/token")
+    @PostMapping("/account/token")
     public JSONData token(@RequestBody @Valid RequestLogin form, Errors errors) {
 
         if (errors.hasErrors()) {
-           throw new BadRequestException(utils.getErrorMessages(errors));
+            throw new BadRequestException(utils.getErrorMessages(errors));
         }
 
         String token = tokenProvider.createToken(form.getEmail(), form.getPassword());
 
         return new JSONData(token);
     }
-
-    @Operation(summary ="회원 조회", description = "일반, 관리자에 따라 개인정보 보회 조회 범위 다름")
-    @ApiResponse(responseCode = "200", description = "검색된 학생 목록")
-    @Parameters({
-            @Parameter(name="page", example="1", description = "페이지 번호"),
-            @Parameter(name="limit", example="20", description = "페이지 당 레코드 수")
-    })
-
-
-    @GetMapping("/list")
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    public JSONData list(@ModelAttribute MemberSearch search) {
-
-        /**
-         * 조회 가능 범위
-         * 학생 : 학과, 지도 교수, 주소, 핸펀, 이메일
-         * 관리자 : 담당 과목, 핸펀, 이메일
-         */
-        ListData<Member> data = infoService.getList(search);
-
-        List<Member> items = data.getItems();
-        Authority authority = memberUtil.getMember().getAuthorities().get(0).getAuthority();
-
-        List<Map<String, Object>> newItems = new ArrayList<>();
-        for(Member item : items) {
-            Map<String, Object> _item = new HashMap<>();
-            _item.put("seq", item.getSeq());
-            _item.put("email", item.getEmail());
-            _item.put("mobile", item.getMobile());
-
-            if(authority == Authority.USER) {
-                _item.put("department", item.getDepartment());
-                _item.put("role", item.getRole());
-                _item.put("manager", item.getManager());
-            } else if(authority == Authority.MANAGER) {
-                _item.put("department", item.getDepartment());
-            }
-            newItems.add(_item);
-        }
-        ListData<Map<String, Object>> data2 = new ListData<>(newItems, data.getPagination());
-        return new JSONData(data2);
-    }
-
 }

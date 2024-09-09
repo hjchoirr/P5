@@ -1,10 +1,10 @@
 package org.choongang.member.services;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.jni.FileInfo;
 import org.choongang.global.ListData;
 import org.choongang.global.Pagination;
 import org.choongang.member.MemberInfo;
@@ -53,26 +53,42 @@ public class MemberInfoService implements UserDetailsService {
                 .authorities(authorities)
                 .build();
     }
-    @Transactional  //**** 왜? JPA factory 쓸때?
+
+    /**
+     * 회원 목록 조회
+     *
+     * @param search
+     * @return
+     */
+    @Transactional
     public ListData<Member> getList(MemberSearch search) {
         int page = Math.max(search.getPage(), 1);
         int limit = search.getLimit();
         limit = limit < 1 ? 20 : limit;
-
         int offset = (page - 1) * limit;
 
+        /* 검색 처리 S */
         BooleanBuilder andBuilder = new BooleanBuilder();
         QMember member = QMember.member;
 
         String sopt = search.getSopt();
         String skey = search.getSkey();
-        sopt = StringUtils.hasText(sopt) ? sopt.toLowerCase() : "ALL";
-        if(StringUtils.hasText(skey)) {
+        sopt = StringUtils.hasText(sopt) ? sopt.toUpperCase() : "ALL";
+        if (StringUtils.hasText(skey)) {
             skey = skey.trim();
-            if(sopt.equals("ALL")) { //통합검색
-
+            StringExpression expression = null;
+            if (sopt.equals("ALL")) { // 통합 검색
+                expression = member.email.concat(member.userName)
+                        .concat(member.mobile)
+                        .concat(member.address)
+                        .concat(member.addressSub);
+            } else if (sopt.equals("name")) {
+                expression = member.userName;
             }
+            andBuilder.and(expression.contains(skey));
         }
+        
+        /* 검색 처리 E */
 
         List<Member> items = queryFactory.selectFrom(member)
                 .leftJoin(member.authorities)
@@ -84,11 +100,8 @@ public class MemberInfoService implements UserDetailsService {
                 .fetch();
 
         long total = memberRepository.count(andBuilder);
-
-        //int page, int total, int ranges, int limit, HttpServletRequest request
         Pagination pagination = new Pagination(page, (int)total, 10, limit, request);
+
         return new ListData<>(items, pagination);
     }
-
-
 }
