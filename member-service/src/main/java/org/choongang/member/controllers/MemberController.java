@@ -84,6 +84,7 @@ public class MemberController {
     @PostMapping("/account")
     public ResponseEntity join(@RequestBody @Valid RequestJoin form, Errors errors) {
 
+        System.out.println("form.email: " + form.getEmail());
         joinValidator.validate(form, errors);
 
         if (errors.hasErrors()) {

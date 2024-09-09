@@ -23,6 +23,8 @@ public class JoinValidator implements Validator, PasswordValidator, MobileValida
 
     @Override
     public void validate(Object target, Errors errors) {
+        System.out.println(errors.getAllErrors());
+
         if (errors.hasErrors()) {
             return;
         }
