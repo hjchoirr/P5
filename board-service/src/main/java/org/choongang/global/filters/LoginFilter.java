@@ -1,5 +1,6 @@
 package org.choongang.global.filters;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -10,10 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.choongang.global.Utils;
 import org.choongang.global.rests.JSONData;
 import org.choongang.member.MemberInfo;
+import org.choongang.member.MemberUtil;
 import org.choongang.member.constants.Authority;
 import org.choongang.member.entities.Authorities;
 import org.choongang.member.entities.Member;
-import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -27,7 +28,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.GenericFilterBean;
-import com.fasterxml.jackson.core.JsonProcessingException;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -39,6 +40,7 @@ public class LoginFilter extends GenericFilterBean {
     private final RestTemplate restTemplate;
     private final ObjectMapper om;
     private final Utils utils;
+    private final MemberUtil memberUtil;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -47,9 +49,11 @@ public class LoginFilter extends GenericFilterBean {
         if (StringUtils.hasText(token)) {
             loginProcess(token);
         }
-
         chain.doFilter(request, response);
     }
+
+
+
 
     /**
      * JWT 토큰 으로 회원 정보 로그인 처리
@@ -58,10 +62,11 @@ public class LoginFilter extends GenericFilterBean {
      */
     private void loginProcess(String token) {
 
-
         try {
             String apiUrl = utils.url("/account", "member-service");
-            // api서버 주소/account
+            System.out.println("loginProcess - apiUrl :" + apiUrl);
+
+            // member 서버 주소/account
 
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(token);
@@ -126,4 +131,5 @@ public class LoginFilter extends GenericFilterBean {
 
         return null;
     }
+
 }

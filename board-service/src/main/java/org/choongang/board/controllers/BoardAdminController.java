@@ -66,6 +66,7 @@ public class BoardAdminController {
     @Parameter(name="bid", required = true, description = "경로변수", example = "notice")
     @GetMapping("/info/{bid}")
     public JSONData info(@PathVariable("bid") String bid) {
+        System.out.println("BoardAdminController.info : bid = " + bid);
         Board board = configInfoService.get(bid);
 
         return new JSONData(board);
@@ -83,6 +84,7 @@ public class BoardAdminController {
             @Parameter(name="bName", description = "게시판 이름"),
             @Parameter(name="active", description = "게시판 사용중 여부", example = "true")
     })
+    //@PreAuthorize("hasAnyAuthority('ADMIN')")
     public JSONData list(@ModelAttribute BoardSearch search) {
 
         ListData data = configInfoService.getList(search, true);

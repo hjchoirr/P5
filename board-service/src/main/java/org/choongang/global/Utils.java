@@ -70,11 +70,36 @@ public class Utils { // 빈의 이름 - utils
     }
 
     public String url(String url, String serviceId) {
-        List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
+        System.out.println("1 serviceId :" + serviceId);
+        String tmp = new String(serviceId);
 
+
+        List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
+/*
+        System.out.println("---discoveryClient instances ---");
+        System.out.println(instances);
+        System.out.println("-------------------------");
+        instances.forEach(i -> {
+            System.out.println("i.getServiceId(): " + i.getServiceId());
+            System.out.println("i.getInstanceId(): " + i.getInstanceId());
+            System.out.println("i.getHost(): " + i.getHost());
+            System.out.println("i.getPort(): " + i.getPort());
+            System.out.println("i.getUri(): " + i.getUri());
+            System.out.println("i.getMetadata(): " + i.getMetadata());
+        });
+*/
         try {
+            System.out.println("2 serviceId :" + serviceId);
+            System.out.println("2 tmp : " + tmp);
+            /*
+            if(!instances.get(0).getInstanceId().contains(serviceId)) {
+                throw new RuntimeException(serviceId + "를 찾을 수 없습니다.");
+            }
+            */
             return String.format("%s%s", instances.get(0).getUri().toString(), url);
         } catch (Exception e) {
+            System.out.println("3 serviceId :" + serviceId);
+            System.out.println("3 tmp : " + tmp);
             return String.format("%s://%s:%d%s%s", request.getScheme(), request.getServerName(), request.getServerPort(), request.getContextPath(), url);
         }
     }

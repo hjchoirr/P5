@@ -28,17 +28,20 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http.csrf(c -> c.disable())
-                .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter.class)
-                .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(h -> {
-                    h.authenticationEntryPoint((req, res, e) -> res.sendError(HttpStatus.UNAUTHORIZED.value()));
-                   h.accessDeniedHandler((req, res, e) -> res.sendError(HttpStatus.UNAUTHORIZED.value()));
-                })
-                .authorizeHttpRequests(c -> {
-                        c.requestMatchers("/admin/**").hasAnyAuthority("ADMIN")
-                                .anyRequest().permitAll();
-                });
+
+            .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter.class)
+            .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(h -> {
+                h.authenticationEntryPoint((req, res, e) -> res.sendError(HttpStatus.UNAUTHORIZED.value()));
+               h.accessDeniedHandler((req, res, e) -> res.sendError(HttpStatus.UNAUTHORIZED.value()));
+            })
+
+            .authorizeHttpRequests(c -> {
+                    c
+                    .requestMatchers("/admin/**").hasAnyAuthority("ADMIN")
+                    .anyRequest().permitAll();
+            });
 
         return http.build();
     }

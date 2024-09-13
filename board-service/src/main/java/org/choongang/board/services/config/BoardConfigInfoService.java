@@ -40,9 +40,10 @@ public class BoardConfigInfoService {
      * @return
      */
     public Board get(String bid) {
+        System.out.println("BoardConfigInfoService.get: " + bid);
         Board board = boardRepository.findById(bid).orElseThrow(BoardNotFoundException::new);
 
-        addBoardInfo(board);
+        addBoardInfo(board); //file-service 죽어있을때 문제있음 ****
 
         return board;
 
@@ -70,13 +71,16 @@ public class BoardConfigInfoService {
      */
     public void addBoardInfo(Board board) {
         String gid = board.getGid();
-
+        System.out.println("=====addBoardInfo=S1=====");
         List<FileInfo> htmlTopImages = fileInfoService.getList(gid, "html_top");
 
+        System.out.println("=====addBoardInfo=S2=====");
         List<FileInfo> htmlBottomImages = fileInfoService.getList(gid, "html_bottom");
 
         board.setHtmlTopImages(htmlTopImages);
         board.setHtmlBottomImages(htmlBottomImages);
+        System.out.println("=====addBoardInfo=E=====");
+
     }
 
     /**

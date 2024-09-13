@@ -55,6 +55,7 @@ public class JwtFilter extends GenericFilterBean {
         String bearerToken = req.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken)
                 && bearerToken.toUpperCase().startsWith("BEARER ")) {
+
             return bearerToken.substring(7).trim();
         }
 

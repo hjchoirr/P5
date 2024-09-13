@@ -13,7 +13,39 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class MemberUtil {
+    /*
+        public boolean isLogin() {
+            return true;
+        }
 
+        public boolean isAdmin() {
+
+            return true;
+        }
+        public Member getMember() {
+
+            Member member = new Member();
+            member.setUserName("사용자01");
+            member.setEmail("user01@test.com");
+    *
+            List<Authorities> authorities = List.of(USER, ADMIN).stream().map(s -> {
+                Authorities authority = new Authorities();
+                authority.setAuthority(s);
+                return authority;
+            }).toList();
+            System.out.println(authorities);
+    *
+            List<Authorities> authorities1 = List.of(Authority.ADMIN, Authority.USER).stream().map(s -> {
+                return Authorities.builder().authority(s).build();
+                    }).toList();
+            System.out.println("authorities1 :" + authorities1);
+
+            member.setAuthorities(authorities1);
+
+            return member;
+        }
+
+    */
     public boolean isLogin() {
         return getMember() != null;
     }
@@ -36,4 +68,6 @@ public class MemberUtil {
 
         return null;
     }
+
+
 }
