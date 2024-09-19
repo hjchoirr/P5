@@ -2,4 +2,4 @@ cors:
   allow:
     origins: 
         - 'http://localhost:7000'
-        - 'http://localhost:7000'
+        - 'http://localhost:7001'
