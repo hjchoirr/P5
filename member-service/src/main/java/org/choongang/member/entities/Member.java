@@ -11,8 +11,6 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name="MTYPE")
 public class Member extends BaseEntity {
     @Id
     @GeneratedValue

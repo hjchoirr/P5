@@ -50,6 +50,8 @@ public class MemberController {
     @GetMapping("/account")
     @PreAuthorize("isAuthenticated()")
     public JSONData info(@AuthenticationPrincipal MemberInfo memberInfo) {
+        System.out.println("memberInfo: " + memberInfo);
+
         Member member = memberInfo.getMember();
 
         Authority authority = memberUtil.getMember().getAuthorities().get(0).getAuthority();
