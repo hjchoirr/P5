@@ -6,7 +6,6 @@ spring:
           '[/**]':
             allowedOrigins:
               - 'http://localhost:7000'
-              - 'http://localhost:7001'
             allowCredentials: true # 요청시 인증 정보 전송 허가
             allowedHeaders: '*'
             allowedMethods: '*'
