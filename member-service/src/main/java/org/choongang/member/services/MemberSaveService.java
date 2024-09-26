@@ -3,6 +3,7 @@ package org.choongang.member.services;
 import lombok.RequiredArgsConstructor;
 import org.choongang.member.MemberUtil;
 import org.choongang.member.constants.Authority;
+import org.choongang.member.controllers.RequestAuthority;
 import org.choongang.member.controllers.RequestJoin;
 import org.choongang.member.controllers.RequestUpdate;
 import org.choongang.member.entities.Authorities;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -105,5 +107,34 @@ public class MemberSaveService {
             authoritiesRepository.saveAllAndFlush(items);
         }
         // 권한 추가, 수정 E
+    }
+    public void updateAuthority(RequestAuthority form) {
+
+        Long seq = form.getMemberSeq();
+        if(StringUtils.hasText(form.getAuthorityName())){
+            Authority authority = Authority.valueOf(form.getAuthorityName());
+
+            Member member = memberRepository.findById(seq).orElseThrow(MemberNotFoundException::new);
+            System.out.println("member :" + member + " authority :" + authority);
+            // 권한 추가, 수정 S
+            if (authority != null) {
+
+                List<Authorities> items = authoritiesRepository.findByMember(member);
+                items.forEach(a -> {
+                    if(a.getAuthority().equals(authority) && ! form.isInvoke()){
+                        authoritiesRepository.delete(a);
+                        authoritiesRepository.flush();
+                        System.out.println("deleted authorities :" + a);
+                    }
+                });
+                if(form.isInvoke()) {
+                    Authorities authorities = Authorities.builder().member(member).authority(authority).build();
+                    authoritiesRepository.saveAndFlush(authorities);
+                    System.out.println("saved authorities :" + authorities);
+                }
+                authoritiesRepository.flush();
+            }
+            // 권한 추가, 수정 E
+        }
     }
 }

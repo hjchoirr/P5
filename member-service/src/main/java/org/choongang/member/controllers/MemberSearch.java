@@ -5,4 +5,5 @@ import org.choongang.global.CommonSearch;
 
 @Data
 public class MemberSearch extends CommonSearch {
+    private String authority;
 }

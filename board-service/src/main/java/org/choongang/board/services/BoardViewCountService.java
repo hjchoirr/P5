@@ -3,6 +3,7 @@ package org.choongang.board.services;
 import lombok.RequiredArgsConstructor;
 import org.choongang.board.entities.BoardData;
 import org.choongang.board.entities.BoardView;
+import org.choongang.board.entities.BoardViewId;
 import org.choongang.board.entities.QBoardView;
 import org.choongang.board.repositories.BoardDataRepository;
 import org.choongang.board.repositories.BoardViewRepository;
@@ -27,8 +28,12 @@ public class BoardViewCountService {
         int uid = memberUtil.isLogin() ? memberUtil.getMember().getSeq().intValue() : utils.guestUid();
 
         BoardView boardView = new BoardView(seq, uid);
-        viewRepository.saveAndFlush(boardView);
 
+        //해당 BoardView 가 있으면 insert 하지 않는다
+        BoardViewId id = new BoardViewId(seq, uid);
+        if(viewRepository.findById(id).isEmpty()) {
+            viewRepository.saveAndFlush(boardView);
+        }
         // 전체 조회수
         QBoardView bv = QBoardView.boardView;
         long total = viewRepository.count(bv.seq.eq(seq));

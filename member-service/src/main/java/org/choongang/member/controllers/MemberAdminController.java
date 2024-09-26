@@ -17,6 +17,7 @@ import org.choongang.member.entities.Member;
 import org.choongang.member.services.MemberInfoService;
 import org.choongang.member.services.MemberSaveService;
 import org.choongang.member.validators.UpdateValidator;
+import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,9 +43,12 @@ public class MemberAdminController {
             @Parameter(name="skey", description = "검색키워드"),
     })
     @GetMapping
-    public JSONData list(@ModelAttribute MemberSearch search) {
+    public JSONData list(@ModelAttribute MemberSearch search, Model model) {
 
         ListData data = memberInfoService.getList(search);
+
+        //List<Authority> allAuthorities = List.of(Authority.ADMIN, Authority.USER, Authority.ALL);
+        //model.addAttribute("allAuthorities", allAuthorities);
 
         return new JSONData(data);
     }
@@ -82,6 +86,11 @@ public class MemberAdminController {
         List<Authority> authorities = form.getAuthority() == null ? null : form.getAuthority().stream().map(Authority::valueOf).toList();
 
         memberSaveService.save(form, authorities);
+    }
+    @PatchMapping("/updateAuthority")
+    public void updateAuthority(@RequestBody RequestAuthority form) {
+        System.out.println("form :" + form);
+        memberSaveService.updateAuthority(form);
     }
 
 }

@@ -60,16 +60,6 @@ public class MemberController {
         item.put("seq", member.getSeq());
         item.put("email", member.getEmail());
         item.put("mobile", member.getMobile());
-        if (authority == Authority.COUNSELOR || authority == Authority.PROFESSOR) {
-            item.put("subject", member.getSubject());
-        } else if(authority == Authority.STUDENT) { // 학생
-            item.put("department", member.getDepartment());
-            item.put("professor", member.getProfessor());
-            item.put("zonecode", member.getZonecode());
-            item.put("address", member.getAddress());
-            item.put("addressSub", member.getAddressSub());
-        }
-
         return authority == Authority.ADMIN ? new JSONData(member) : new JSONData(item);
     }
 

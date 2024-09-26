@@ -3,7 +3,9 @@ package org.choongang.member.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import org.choongang.global.entities.BaseEntity;
+import org.choongang.member.constants.Gender;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -38,7 +40,12 @@ public class Member extends BaseEntity {
     private String address; // 주소
     private String addressSub; // 나머지 주소
 
-    private String subject; // 담당 과목
+    @Column(length=10)
+    private LocalDate birth; // 생년월일
+
+    @Enumerated(EnumType.STRING)
+    @Column(length=10)
+    private Gender gender; // 성별
 
     @ToString.Exclude
     @OneToMany(mappedBy = "member")

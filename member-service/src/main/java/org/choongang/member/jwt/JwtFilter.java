@@ -15,6 +15,7 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -59,6 +60,13 @@ public class JwtFilter extends GenericFilterBean {
             System.out.println(req.getRequestURI() + "=>" +  headerName + ": " + req.getHeader(headerName));
         });
         */
+        Enumeration<String> headerNames = req.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            String headerValue = req.getHeader(headerName);
+            System.out.println(req.getRequestURI() + " " + headerName + ":" + headerValue);
+        }
+
 
         String bearerToken = req.getHeader("Authorization");
         System.out.println("getToken token: " + bearerToken);
